@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: zeragon-db
+    environment:
+      POSTGRES_USER: zeragon
+      POSTGRES_PASSWORD: 13415968273
+      POSTGRES_DB: zeragon-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  forum:
+    build:
+      context: ./forum
+      dockerfile: Dockerfile
+    container_name: zeragon-forum
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/zeragon-db
+      SPRING_DATASOURCE_USERNAME: zeragon
+      SPRING_DATASOURCE_PASSWORD: 13415968273
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  console:
+    build:
+      context: ./console
+      dockerfile: Dockerfile
+    container_name: zeragon-console
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/zeragon-db
+      SPRING_DATASOURCE_USERNAME: zeragon
+      SPRING_DATASOURCE_PASSWORD: 13415968273
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  monitoring:
+    build:
+      context: ./monitoring
+      dockerfile: Dockerfile
+    container_name: zeragon-monitoring
+    ports:
+      - "8088:8088"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/zeragon-db
+      SPRING_DATASOURCE_USERNAME: zeragon
+      SPRING_DATASOURCE_PASSWORD: 13415968273
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:
+    driver: bridge
